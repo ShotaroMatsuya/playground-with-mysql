@@ -3,7 +3,7 @@ services:
   mysql:
     image: mysql:5.7
     env_file:
-      - ./mysql/mysql.env
+      - ./env/mysql.env
     ports:
       - 3307:3306
     volumes:
@@ -16,5 +16,16 @@ services:
       - ./mysql/sql:/etc/mysql/sql
     # container_name: mysql
     # restart: always
+  node:
+    build: ./node
+    ports:
+      - 3000:3000
+    volumes:
+      - ./node:/app
+      - /app/node_modules
+    env_file:
+      - ./env/node.env
+    depends_on:
+      - mysql
 volumes:
   data:
