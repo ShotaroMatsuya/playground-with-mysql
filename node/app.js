@@ -30,11 +30,32 @@ const connection = mysql.createConnection({
 //   console.log(results);
 // });
 // Inserting data take 2
-const person = { email: faker.internet.email() };
+// const person = { email: faker.internet.email(), created_at: faker.date.past() };
 
-connection.query('INSERT INTO users SET ?', person, function (err, result) {
-  if (err) throw err;
+// const end_result = connection.query(
+//   'INSERT INTO users SET ?',
+//   person,
+//   function (err, result) {
+//     if (err) throw err;
+//     console.log(result);
+//   }
+// );
+// console.log(end_result.sql);
+
+// connection.end();
+
+// console.log(faker.date.past());
+// 2020-09-03T15:04:46.312Z
+
+// Insert lots of data!!!
+const data = [];
+for (let i = 0; i < 500; i++) {
+  data.push([faker.internet.email(), faker.date.past()]);
+}
+console.log(data);
+const q = 'INSERT INTO users(email,created_at) VALUES ?';
+connection.query(q, [data], function (err, result) {
+  console.log(err);
   console.log(result);
 });
-
 connection.end();
