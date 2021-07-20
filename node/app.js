@@ -17,12 +17,24 @@ const connection = mysql.createConnection({
 //   console.log(faker.address.state());
 // }
 
-const q = 'SELECT CURTIME() as time, CURDATE() as date, NOW() as now';
-connection.query(q, function (error, results, fields) {
-  if (error) throw error;
-  console.log(results[0].time);
-  console.log(results[0].date.toString());
-  console.log(results[0].now.toString());
+// Selecting data
+// const q = 'SELECT COUNT(*) AS total FROM users';
+// connection.query(q, function (error, results, fields) {
+//   if (error) throw error;
+//   console.log(results[0].total);
+// });
+// Inserting data
+// const q = 'INSERT INTO users(email) VALUES("wyatt_the_dog@gmail.com")';
+// connection.query(q, function (error, results, fields) {
+//   if (error) throw error;
+//   console.log(results);
+// });
+// Inserting data take 2
+const person = { email: faker.internet.email() };
+
+connection.query('INSERT INTO users SET ?', person, function (err, result) {
+  if (err) throw err;
+  console.log(result);
 });
 
 connection.end();
