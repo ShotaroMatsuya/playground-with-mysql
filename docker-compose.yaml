@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   mysql:
+    platform: linux/x86_64 # M1チップ対応のため追記
     image: mysql:5.7
     env_file:
       - ./env/mysql.env
