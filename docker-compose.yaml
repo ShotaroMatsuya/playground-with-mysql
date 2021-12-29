@@ -6,17 +6,16 @@ services:
     env_file:
       - ./env/mysql.env
     ports:
-      - 3307:3306
+      - 3306:3306
     volumes:
       # bindMounts
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       #   - ./mysql/init:/docker-entrypoint-initdb.d
       # named volume
-      - data:/var/lib/mysql
+      - data1:/var/lib/mysql
       # bind MOunts
       - ./mysql/sql:/etc/mysql/sql
-    # container_name: mysql
-    # restart: always
+
   node:
     build: ./node
     ports:
@@ -29,4 +28,4 @@ services:
     depends_on:
       - mysql
 volumes:
-  data:
+  data1:
