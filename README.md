@@ -518,3 +518,42 @@ SELECT * FROM innodb_trx WHERE trx_started < now() - interval 1 minute ORDER BY 
 ```sql
 SELECT * FROM data_lock_waits\G
 ```
+
+## index performance
+
+### index の評価
+
+- フル テーブル スキャンが行われたテーブルを調べる最も簡単な方法は、sys.schema_tables_with_full_table_scans ビューのクエリを行う
+
+```sql
+select * from schema_tables_with_full_table_scans\G
+```
+
+- 次に有用なのは statements_with_full_table_scan
+  インデックスが使われていない statement を表示するノーマライズされたもの
+
+```sql
+select * from statements_with_full_table_scan\G
+```
+
+- 使われていない index を探す
+
+```sql
+select * from schema_unused_indexes\G
+```
+
+- 冗長な index を探す
+
+```sql
+select * from schema_redundant_indexes\G
+```
+
+- 統計情報の精度は、persistent statistics か transient statistics のどちらが使われているかに依存する
+  `innodb_stats_persistent_sample_pages`と`innodb_stats_transient_sample_pages`  
+   これらの数値はテーブルごとに設定するのが推奨される
+  ではどれくらいの数値が適当なのか
+- 規則的な distribution であれば、基本的に低い数値
+- 不規則的な distribution であれば、上げたほうが良い
+- table サイズが大きければ、より多くの page 数を設定することで統計情報の精度が上がる
+- テーブルの 10%の row に変更が起こったときに自動的に`ANALYZE TABLE`が実行されるようになっている
+- table fragment を取り除くことで index を最適化したい場合は`OPTIMIZW TABLE name;`を実行
