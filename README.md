@@ -349,19 +349,25 @@ SELECT (100 * SUM_TIMER_WAIT / sum(SUM_TIMER_WAIT)
 
 \*mean は平均実行時間
 
-\*SUM_ROWS_EXAMINED が SUM_ROWS_SENT よりも相対的に高いときは、index による filtering が機能していないかもしれない
-\*SUM_SELECT_FULL_JOIN が高いときは、Join コンディションに index が必要か、joint condition が存在しないかのどちらか
-\*SUM_SELECT_RANGE_CHECK が大きいときは index を変更する目安になる
+\*`SUM_ROWS_EXAMINED` が SUM_ROWS_SENT よりも相対的に高いときは、index による filtering が機能していないかもしれない
+
+\*`SUM_SELECT_FULL_JOIN` が高いときは、Join コンディションに index が必要か、joint condition が存在しないかのどちらか
+
+\*`SUM_SELECT_RANGE_CHECK` が大きいときは index を変更する目安になる  
 これは片方のテーブルで全件、もう片方のテーブルで範囲検索を行って JOIN した回数。
-\*SUM_SELECT_RANGE_CHECK は INDEX が貼られてないカラムで JOIN された回数。INDEX が足りていませんので 0 で無いときは INDEX の利用を検討
-\*SUM_CREATED_TMP_DISK_TABLE はディスク上にテンポラリーテーブルが作成された回数
+
+\*`SUM_SELECT_RANGE_CHECK` は INDEX が貼られてないカラムで JOIN された回数。  
+INDEX が足りていないので 0 で無いときは INDEX の利用を検討
+
+\*`SUM_CREATED_TMP_DISK_TABLE` はディスク上にテンポラリーテーブルが作成された回数
 
 **temporary table**
 メモリ上に作成されるテーブル。tmp_table_size を超える場合は、「created_tmp_disk_tables」としてディスク上に作成
 **temp file**
 ファイルソート時に、sort_buffer_size に設定のメモリ領域では足りずに、ディスク上の tmep 領域に出力されるファイル
 
-\*SUM_SORT_MERGE_PASSES はフィアルを利用したマージソートのパス数。カウントされている場合は、sort_buffer_size が不足しファイルアクセスされていることなので、sort_buffer_size を増やすことを検討
+\*`SUM_SORT_MERGE_PASSES` はフィアルを利用したマージソートのパス数。  
+カウントされている場合は、sort_buffer_size が不足しファイルアクセスされていることなので、sort_buffer_size を増やすことを検討
 
 2. high loaded schema table
    フル テーブル スキャンが行われたテーブルを調べる
@@ -378,7 +384,7 @@ select * from statements_with_full_table_scans order by no_index_used_count desc
 
 3. Table I/O と File I/O
 
-- for select
+- for select  
   world という db 名の city テーブルの Table I/O
 
 ```sql
@@ -408,7 +414,7 @@ select * from events_errors_summary_by_account_by_error where error_name = "er_l
 
 ## 統計データの更新
 
-```
+```sql
 ANALYZE TABLE <tbl_name>;
 ```
 
@@ -459,7 +465,7 @@ SET PERSIST innodb_buffer_size = 1073741824;
 
 ### Instance の変更
 
-- innodb_buffer_pool_size と innodb_buffer_pool_instances を変更
+- `innodb_buffer_pool_size` と `innodb_buffer_pool_instances` を変更
 - デフォルトだと 1GB 以下の buffer pool につき 1 つの instance を持つという設定
 - 最大 8 インスタンスまで
 
@@ -473,20 +479,20 @@ innodb_buffer_pool_dump_pct を増やすことでリスタート時のために�
 - redo log は sequential IO であるため、パフォーマンスを上げるため、フロントで log buffer が存在する
 - トランザクションの変化はメモリに保持され、buffer が満タンになるか、transaction がコミットされたときに flush される
 - 書き込み時のデータフローではまずログバッファーに書き込み処理が走る。その後、redo logs への flush 処理が実行される
-- この buffer size を規定しているのは、innodb_log_buffer_size。デフォだと 16MB。トランザクションが多い場合はこの値を上げると良い
+- この buffer size を規定しているのは、`innodb_log_buffer_size`。デフォだと 16MB。トランザクションが多い場合はこの値を上げると良い
 
 - Redo Logs は１つ目のファイルがいっぱいになったら２つ目のファイルを作成、
   ファイル数の制限に達した場合は、再度 1 つめのファイルに戻り、上書きして行く
 - Redo logs がいっぱいになったらそれが ターニングポイントになり bufferpool が tablespcaes への flush を行う
 - redo logs ファイルを大きくすることでこの checkpoint を減らすことができる
-- innodb_log_file_size を大きくすることでリカバリータイムが肥大化する可能性があるが、あまり心配する必要なし。自信をもって大きくして良い
+- `innodb_log_file_size` を大きくすることでリカバリータイムが肥大化する可能性があるが、あまり心配する必要なし。自信をもって大きくして良い
 - ログバッファーと同様に BufferPool にも変更は書き込まれる
   そして変更中のデータは tablespaces ファイルへ flush されるまでは dirty というマークが付与された状態で buffer_pool に保持される
 - InnoDB では Doublewrite buffer を行っているので、crash などが起きた際にも上書き処理が成功したか失敗したかを検知できる
 - buffer pool からの flush が成功したら redo logs では完了というマーキングに変わる
 - クラッシュしてしまうともはや buffer pool は機能しなくなるので、redo logs から読み込まれることになる
-- innodb_io_capacity はデフォルトでは 200 に設定されているが強力な disk であれば、増やしても良い
-  innnodb_io_capacity_max で flush させるのに秒単位でどの程度バックグラウンド処理を行うかに影響を与える
+- `innodb_io_capacity` はデフォルトでは 200 に設定されているが強力な disk であれば、増やしても良い  
+  `innnodb_io_capacity_max` で flush させるのに秒単位でどの程度バックグラウンド処理を行うかに影響を与える
 - この２つの option はどれくらい早く dirty page を tablespaces に flush させるかを決める値
 
 ## Transaction & Lock
@@ -498,7 +504,7 @@ innodb_buffer_pool_dump_pct を増やすことでリスタート時のために�
 
 `SHOW ENGINE INNODB STATUS\G`
 
-- history list length はトランザクションの問題を示唆する指標となる
+- `history list length` はトランザクションの問題を示唆する指標となる
 - commit されると自然に clean up される
 
 以下のクエリでロックの及んでいるカラム数を調べられる
@@ -523,13 +529,13 @@ SELECT * FROM data_lock_waits\G
 
 ### index の評価
 
-- フル テーブル スキャンが行われたテーブルを調べる最も簡単な方法は、sys.schema_tables_with_full_table_scans ビューのクエリを行う
+- フル テーブル スキャンが行われたテーブルを調べる最も簡単な方法は、`sys.schema_tables_with_full_table_scans` ビューのクエリを行う
 
 ```sql
 select * from schema_tables_with_full_table_scans\G
 ```
 
-- 次に有用なのは statements_with_full_table_scan
+- 次に有用なのは `statements_with_full_table_scan`  
   インデックスが使われていない statement を表示するノーマライズされたもの
 
 ```sql
