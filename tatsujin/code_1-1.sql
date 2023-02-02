@@ -129,3 +129,34 @@ SELECT CM.course_name,
   CASE WHEN EXISTS (SELECT 'x' FROM OpenCourses OC WHERE OC.course_id = CM.course_id AND OC.month = 201808) THEN '○' ELSE '✗' END AS "8月"
 FROM CourseMaster CM;
 
+
+
+
+/* CASE式の中で集約関数を使う */
+CREATE TABLE StudentClub
+(std_id  INTEGER,
+ club_id INTEGER,
+ club_name VARCHAR(32),
+ main_club_flg CHAR(1),
+ PRIMARY KEY (std_id, club_id));
+
+INSERT INTO StudentClub VALUES(100, 1, '野球',        'Y');
+INSERT INTO StudentClub VALUES(100, 2, '吹奏楽',      'N');
+INSERT INTO StudentClub VALUES(200, 2, '吹奏楽',      'N');
+INSERT INTO StudentClub VALUES(200, 3, 'バドミントン','Y');
+INSERT INTO StudentClub VALUES(200, 4, 'サッカー',    'N');
+INSERT INTO StudentClub VALUES(300, 4, 'サッカー',    'N');
+INSERT INTO StudentClub VALUES(400, 5, '水泳',        'N');
+INSERT INTO StudentClub VALUES(500, 6, '囲碁',        'N');
+
+-- 1. 1つだけクラブに所属している学生については、そのクラブIDを取得する
+-- 2. 複数のクラブを掛け持ちしている学生については、主なクラブのIDを取得する
+
+-- 集積関数の中で入れ子で集積関数使うとバグる
+SELECT std_id,
+  CASE WHEN COUNT(club_id) = 1 THEN MAX(club_id)
+  ELSE MAX(CASE WHEN main_club_flg = 'Y' THEN club_id ELSE NULL END)
+  END AS "メインクラブ"
+FROM StudentClub
+GROUP BY std_id;
+
