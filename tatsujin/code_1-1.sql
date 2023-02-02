@@ -63,3 +63,40 @@ SELECT
 FROM PopTbl2
 GROUP BY pref_name;
 
+
+/* 条件を分岐させたUPDATE */
+CREATE TABLE Salaries
+(name VARCHAR(32) NOT NULL,
+salary INTEGER NOT NULL);
+
+INSERT INTO Salaries VALUES('相田', 300000);
+INSERT INTO Salaries VALUES('神埼', 270000);
+INSERT INTO Salaries VALUES('木村', 220000);
+INSERT INTO Salaries VALUES('斎藤', 290000);
+-- 1.現在の給料が30万以上の社員は、10%の減給
+-- 2.現在の給料が25万以上の社員は28マン未満の社員は、20%の昇給 (p13)
+
+UPDATE Salaries
+  SET salary = 
+    CASE WHEN salary >= 300000 THEN salary * 0.9
+         WHEN salary >= 250000 AND salary < 280000 THEN salary * 1.2
+    ELSE salary END;
+
+/* 条件を分岐させたUPDATE2 */
+CREATE TABLE SomeTable
+(p_key CHAR(1) PRIMARY KEY,
+ col_1 INTEGER NOT NULL, 
+ col_2 CHAR(2) NOT NULL);
+
+INSERT INTO SomeTable VALUES('a', 1, 'あ');
+INSERT INTO SomeTable VALUES('b', 2, 'い');
+INSERT INTO SomeTable VALUES('c', 3, 'う');
+
+-- 主Key aとbを入れ替える
+UPDATE SomeTable
+  SET p_key = 
+    CASE WHEN p_key = 'a' THEN 'b'
+         WHEN p_key = 'b' THEN 'a'
+    ELSE p_key END
+WHERE p_key IN ('a', 'b'); -- mysqlではエラーになってしまう(主Keyじゃなければ有用なクエリ)
+
