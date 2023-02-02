@@ -31,3 +31,35 @@ GROUP BY district
 ;
 
 
+/* 異なる条件の集計を1つのSQLで行う */
+CREATE TABLE PopTbl2
+(pref_name VARCHAR(32),
+ sex CHAR(1) NOT NULL,
+ population INTEGER NOT NULL,
+    PRIMARY KEY(pref_name, sex));
+
+INSERT INTO PopTbl2 VALUES('徳島', '1',	60 );
+INSERT INTO PopTbl2 VALUES('徳島', '2',	40 );
+INSERT INTO PopTbl2 VALUES('香川', '1',	100);
+INSERT INTO PopTbl2 VALUES('香川', '2',	100);
+INSERT INTO PopTbl2 VALUES('愛媛', '1',	100);
+INSERT INTO PopTbl2 VALUES('愛媛', '2',	50 );
+INSERT INTO PopTbl2 VALUES('高知', '1',	100);
+INSERT INTO PopTbl2 VALUES('高知', '2',	100);
+INSERT INTO PopTbl2 VALUES('福岡', '1',	100);
+INSERT INTO PopTbl2 VALUES('福岡', '2',	200);
+INSERT INTO PopTbl2 VALUES('佐賀', '1',	20 );
+INSERT INTO PopTbl2 VALUES('佐賀', '2',	80 );
+INSERT INTO PopTbl2 VALUES('長崎', '1',	125);
+INSERT INTO PopTbl2 VALUES('長崎', '2',	125);
+INSERT INTO PopTbl2 VALUES('東京', '1',	250);
+INSERT INTO PopTbl2 VALUES('東京', '2',	150);
+
+-- 県ごとの男女人口を集計（p8）
+SELECT
+  pref_name,
+  MAX(CASE WHEN sex = 1 THEN population ELSE 0 END) AS "男",
+  MAX(CASE WHEN sex = 2 THEN population ELSE 0 END) AS "女"
+FROM PopTbl2
+GROUP BY pref_name;
+
