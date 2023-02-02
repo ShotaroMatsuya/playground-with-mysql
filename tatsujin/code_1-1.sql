@@ -100,3 +100,32 @@ UPDATE SomeTable
     ELSE p_key END
 WHERE p_key IN ('a', 'b'); -- mysqlではエラーになってしまう(主Keyじゃなければ有用なクエリ)
 
+/* テーブル同士のマッチング */
+CREATE TABLE CourseMaster
+(course_id   INTEGER PRIMARY KEY,
+ course_name VARCHAR(32) NOT NULL);
+
+INSERT INTO CourseMaster VALUES(1, '経理入門');
+INSERT INTO CourseMaster VALUES(2, '財務知識');
+INSERT INTO CourseMaster VALUES(3, '簿記検定');
+INSERT INTO CourseMaster VALUES(4, '税理士');
+
+CREATE TABLE OpenCourses
+(month       INTEGER ,
+ course_id   INTEGER ,
+    PRIMARY KEY(month, course_id));
+
+INSERT INTO OpenCourses VALUES(201806, 1);
+INSERT INTO OpenCourses VALUES(201806, 3);
+INSERT INTO OpenCourses VALUES(201806, 4);
+INSERT INTO OpenCourses VALUES(201807, 4);
+INSERT INTO OpenCourses VALUES(201808, 2);
+INSERT INTO OpenCourses VALUES(201808, 4);
+
+--各月の開口状況をひと目で分かるクロス表を作成 (p16)
+SELECT CM.course_name,
+  CASE WHEN EXISTS (SELECT 'x' FROM OpenCourses OC WHERE OC.course_id = CM.course_id AND OC.month = 201806) THEN '○' ELSE '✗' END AS "6月",
+  CASE WHEN EXISTS (SELECT 'x' FROM OpenCourses OC WHERE OC.course_id = CM.course_id AND OC.month = 201807) THEN '○' ELSE '✗' END AS "7月",
+  CASE WHEN EXISTS (SELECT 'x' FROM OpenCourses OC WHERE OC.course_id = CM.course_id AND OC.month = 201808) THEN '○' ELSE '✗' END AS "8月"
+FROM CourseMaster CM;
+
